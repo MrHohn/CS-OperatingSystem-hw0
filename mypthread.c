@@ -5,11 +5,14 @@
 #include <stdlib.h>       // atoi(..)
 #include "mypthread-system-override.h"
 ucontext_t coroutine_main;
+ucontext_t coroutine_sub[32];
+int thread_id = 0;
+int first = 1;
 
 int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
 			void *(*start_routine) (void *), void *arg){
 	printf("start initializing a thread\n");
-	sleep(1);
+	// sleep(1);
 	getcontext(&((*thread).ctx));
     (*thread).ctx.uc_stack.ss_sp = (*thread).st;
     (*thread).ctx.uc_stack.ss_size = sizeof((*thread).st);
@@ -21,7 +24,7 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
 }
 
 void mypthread_exit(void *retval){
-
+	setcontext(&coroutine_main);
 }
 
 int mypthread_yield(void){
@@ -29,7 +32,37 @@ int mypthread_yield(void){
 	// ucontext_t u;
 	// getcontext(&u);
 	// swapcontext(&u, u.uc_link);
-	setcontext(&coroutine_main);
+	// setcontext(&coroutine_main);
+	// if(first){
+		if(thread_id <= 30){
+			if(first){
+				thread_id++;
+				swapcontext(&coroutine_sub[thread_id], &coroutine_main);	
+			}
+			else{
+				thread_id++;
+				swapcontext(&coroutine_sub[thread_id], &coroutine_sub[thread_id + 1]);
+			}
+		}
+		else if(thread_id == 31){
+			thread_id = 0;
+			first = 0;
+			swapcontext(&coroutine_sub[thread_id + 32], &coroutine_sub[thread_id + 1]);
+		}
+		// else{
+		// 	thread_id--;
+		// 	swapcontext(&coroutine_sub[thread_id + 1], &coroutine_sub[thread_id]);
+		// }
+
+	// 		first = 0;
+	// 		swapcontext(&coroutine_sub[thread_id], &coroutine_sub[thread_id - 1]);
+	// 	}
+	// }
+	// else{
+	// 	thread_id--;
+
+	// }
+	
 	// swapcontext(&u, &coroutine_main);
 	printf("finish yielding\n");
 
@@ -38,7 +71,7 @@ int mypthread_yield(void){
 
 int mypthread_join(mypthread_t thread, void **retval){
 	printf("start joining a thread\n");
-	sleep(1);
+	// sleep(1);
 	// ucontext_t u;
 	// swapcontext(&u, &(thread.ctx));
 	// getcontext(&coroutine_main);

@@ -14,7 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Defines
 // Default list size (in terms of number of elements)
-#define LISTSIZE     (4)
+#define LISTSIZE     (32)
 
 struct pthrarg
 {
@@ -62,7 +62,7 @@ void *fnsort( void *arg )
         printf("before swap\n");
         printf("num[0] = %d\n", num[0]);
         printf("num[1] = %d\n", num[1]);
-        
+
         if( num[1] < num[0] )
         {
             swap   = num[0];
@@ -72,7 +72,7 @@ void *fnsort( void *arg )
         printf("after swap\n");
         printf("num[0] = %d\n", num[0]);
         printf("num[1] = %d\n", num[1]);
-        sleep(1);
+        // sleep(1);
 
         mypthread_mutex_unlock( mtx0 );
         mypthread_mutex_unlock( mtx1 );
@@ -98,7 +98,8 @@ void * fncheck( void *arg )
 
     while( !quitting )
     {
-        printf( "." );
+        printf( "checking\n" );
+        // printf( "." );
         if( (j+1) % 80 == 0 )
             printf( "\n" );
 
@@ -124,7 +125,7 @@ void * fncheck( void *arg )
         // j seconds
         j = j+1;
 #ifndef MYTHREAD
-        sleep( j );
+        // sleep( j );
 #endif
         mypthread_yield( );
     }
