@@ -59,9 +59,9 @@ void *fnsort( void *arg )
             continue;
         }
 
-        printf("before swap\n");
-        printf("num[0] = %d\n", num[0]);
-        printf("num[1] = %d\n", num[1]);
+        // printf("before swap\n");
+        // printf("num[0] = %d\n", num[0]);
+        // printf("num[1] = %d\n", num[1]);
 
         if( num[1] < num[0] )
         {
@@ -69,9 +69,9 @@ void *fnsort( void *arg )
             num[0] = num[1];
             num[1] = swap;
         }
-        printf("after swap\n");
-        printf("num[0] = %d\n", num[0]);
-        printf("num[1] = %d\n", num[1]);
+        // printf("after swap\n");
+        // printf("num[0] = %d\n", num[0]);
+        // printf("num[1] = %d\n", num[1]);
         // sleep(1);
 
         mypthread_mutex_unlock( mtx0 );
@@ -98,8 +98,8 @@ void * fncheck( void *arg )
 
     while( !quitting )
     {
-        printf( "checking\n" );
-        // printf( "." );
+        // printf( "checking\n" );
+        printf( "." );
         if( (j+1) % 80 == 0 )
             printf( "\n" );
 
