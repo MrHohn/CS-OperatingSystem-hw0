@@ -125,7 +125,7 @@ void * fncheck( void *arg )
         // j seconds
         j = j+1;
 #ifndef MYTHREAD
-        // sleep( j );
+        sleep( j );
 #endif
         mypthread_yield( );
     }
