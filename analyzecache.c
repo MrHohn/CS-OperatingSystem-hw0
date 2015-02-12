@@ -114,9 +114,15 @@ int main(int argc, char *argv[])
     }
     int cache_line_size = 0;
     int index = 0;
-    for(i = 1; i < 128; i *=2){
-        if(abs(rate_cache_line[index+1]) < 0.2 && abs(rate_cache_line[index+2]) < 0.2 && rate_cache_line[index] > 0.3){
-            cache_line_size = i * 4;
+    int max = 0;
+    for(i = 1; i < 256; i *=2){
+        // if((fabs(rate_cache_line[index+1]) < 0.3) && (fabs(rate_cache_line[index+2]) < 0.3) && (rate_cache_line[index] > 0.3)){
+        //     cache_line_size = i * 4;
+        // }
+        // printf("abs %f\n", fabs(rate_cache_line[index]));
+        if(fabs(rate_cache_line[index]) > fabs(rate_cache_line[max])){
+            max = index;
+            cache_line_size = i * 4 * 2;
         }
         index++;
     }
