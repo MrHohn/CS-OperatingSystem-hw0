@@ -23,18 +23,21 @@ __u64 gettime()
 int test_cache_linesize(int array[],int len,int K)
 {
     int i,j;
+    int a;
     begin = gettime();
     // for(j = 0; j < 16; j += 1){
         for(i = 0;i < len; i += K)
         {
             array[i]++;
+            // a = array[i];
+            // int b = a + a;
         }   
     // }
     end = gettime();
-    double diff = end - begin;
-    double access = len / K;
-    double average_access_time = diff / access;
-    printf("When K = %d, Average access time: %f us\n", K, average_access_time);
+    // double diff = end - begin;
+    // double access = len / K;
+    // double average_access_time = diff / access;
+    // printf("When K = %d, Average access time: %f us\n", K, average_access_time);
 
     return 0;
 
@@ -75,8 +78,13 @@ int main(int argc, char *argv[])
 
     int i, j;
     int K;
+    int i_test = 0;
     int range;
     int size;
+    double diff_cache_line;
+    double access_cache_line;
+    double average_access_time[10];
+
     if(array == NULL)
     {
         printf("malloc space for array failed \n");
@@ -91,8 +99,25 @@ int main(int argc, char *argv[])
     for(K = 1;K < 1024;K *= 2) 
     {
         test_cache_linesize(array,NUMBER,K);
-        printf("when K = %8d,multiply %8d times,cost %8llu us\n", K,NUMBER/K,end - begin);     
+        diff_cache_line = end - begin;
+        access_cache_line = NUMBER / K;
+        average_access_time[i_test] = diff_cache_line / access_cache_line;
+        printf("When K = %d, Average access time: %f us\n", K, average_access_time[i_test]);
+        printf("when K = %8d,access %8d times,cost %8llu us\n", K,NUMBER/K,end - begin);     
+        i_test++;
     } 
+
+    double rate_cache_line[9];
+    for(i = 0; i < 9; i++){
+        rate_cache_line[i] = (average_access_time[i+1] - average_access_time[i]) / average_access_time[i];
+        printf("%f\n", rate_cache_line[i]);
+    }
+
+
+
+
+
+
     /*
     printf("-----------test the size of L2 cache-----------------------\n");
     printf("-----------by changing the range of memory we access-----------------------\n");
