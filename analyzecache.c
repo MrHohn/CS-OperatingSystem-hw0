@@ -152,52 +152,52 @@ int test_cache()
 
 int main(int argc, char *argv[])
 {
-    // test_cache();
+    test_cache();
 
-    int *array1 = NULL;
-    array1 = malloc(2*1024*1024*sizeof(int));
-    __u64 end;
-    // int *array2 = NULL;
-    // array2 = malloc(128*1024*sizeof(int));
-    int i;
-    int lenmod1 = 2*1024*1024/4 -1;
-    int lenmod2 = 256*1024/4 -1;
-    int lenmod3 = 32*1024/4 -1;
-    int times1 = 2*1024*1024/4;
-    int times2 = 256*1024/4;
+    // int *array1 = NULL;
+    // array1 = malloc(2*1024*1024*sizeof(int));
+    // __u64 end;
+    // // int *array2 = NULL;
+    // // array2 = malloc(128*1024*sizeof(int));
+    // int i;
+    // int lenmod1 = 2*1024*1024/4 -1;
+    // int lenmod2 = 256*1024/4 -1;
+    // int lenmod3 = 32*1024/4 -1;
+    // int times1 = 2*1024*1024/4;
+    // int times2 = 256*1024/4;
 
-    //initialize array(bring the data in to L3 L2 L1 cache)
-    for(i = lenmod1; i >= 0; i--)
-    {
-        array1[i]++;
-    }
-    printf("Finish initialize");
-    //array size 524288
-    // if just one loop, not more than 32768 times access
-    printf("-----------access the data already inside the L2 cache-----------------------\n");
-    begin = gettime();
-    for(i = 0; i <= 100000000; i++){
-         array1[(i*16) & (lenmod2)]++;        
-    }
-    end = gettime();
-    __u64 cost1 = end-begin;
-    printf("cost %10llu us without miss\n", cost1);
+    // //initialize array(bring the data in to L3 L2 L1 cache)
+    // for(i = lenmod1; i >= 0; i--)
+    // {
+    //     array1[i]++;
+    // }
+    // printf("Finish initialize");
+    // //array size 524288
+    // // if just one loop, not more than 32768 times access
+    // printf("-----------access the data already inside the L2 cache-----------------------\n");
+    // begin = gettime();
+    // for(i = 0; i <= 100000000; i++){
+    //      array1[(i*16) & (lenmod2)]++;        
+    // }
+    // end = gettime();
+    // __u64 cost1 = end-begin;
+    // printf("cost %10llu us without miss\n", cost1);
 
-    //initialize array(bring the data in to L3 L2 L1 cache)
-    for(i = 0; i <= lenmod1; i++)
-    {
-        array1[i]++;/*16 means linesize/sizeof(int) = 16*/
-    }
+    // //initialize array(bring the data in to L3 L2 L1 cache)
+    // for(i = 0; i <= lenmod1; i++)
+    // {
+    //     array1[i]++;/*16 means linesize/sizeof(int) = 16*/
+    // }
 
-    printf("-----------access the data not in the L2 cache-----------------------\n");
-    begin = gettime();
-    for(i = 0; i <= 100000000; i++){
-         array1[(i*16) & (lenmod1)]++;          
-    }
-    end = gettime();
-    __u64 cost2 = end-begin;
-    printf("cost %10llu us with all l2 miss\n", cost2);
-    printf("difference = %10llu \n", cost2 - cost1);
+    // printf("-----------access the data not in the L2 cache-----------------------\n");
+    // begin = gettime();
+    // for(i = 0; i <= 100000000; i++){
+    //      array1[(i*16) & (lenmod1)]++;          
+    // }
+    // end = gettime();
+    // __u64 cost2 = end-begin;
+    // printf("cost %10llu us with all l2 miss\n", cost2);
+    // printf("difference = %10llu \n", cost2 - cost1);
 
     // //initialize array(bring the data in to cache)
     // for(i = 0;i < times2; i++)
@@ -212,6 +212,6 @@ int main(int argc, char *argv[])
     // }
     // end = gettime();
     // printf("cost %10llu us without miss\n", end - begin);
-    free(array1);
+    // free(array1);
     return 0;
 }
