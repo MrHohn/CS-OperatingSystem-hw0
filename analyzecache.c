@@ -23,12 +23,18 @@ __u64 gettime()
 int test_cache_linesize(int array[],int len,int K)
 {
     int i,j;
+    begin = gettime();
     // for(j = 0; j < 16; j += 1){
         for(i = 0;i < len; i += K)
         {
             array[i]++;
         }   
     // }
+    end = gettime();
+    double diff = end - begin;
+    double access = len / K;
+    double average_access_time = diff / access;
+    printf("When K = %d, Average access time: %f us\n", K, average_access_time);
 
     return 0;
 
@@ -78,20 +84,19 @@ int main(int argc, char *argv[])
     }
     
     test_cache_linesize(array,NUMBER,1);
-   
+    /*
     printf("---------test cache linesize-------------------------------------------\n");
     printf("---------by chagning the interval we access the array----------\n");   
+    */
     for(K = 1;K < 1024;K *= 2) 
     {
-        begin = gettime();
         test_cache_linesize(array,NUMBER,K);
-        end = gettime();
-        printf("when K = %8d,multiply %8d times,cost %8llu us,average cost %llu us\n",
-        K,NUMBER/K,end - begin,(end-begin)/(NUMBER/K));     
+        printf("when K = %8d,multiply %8d times,cost %8llu us\n", K,NUMBER/K,end - begin);     
     } 
-    
+    /*
     printf("-----------test the size of L2 cache-----------------------\n");
     printf("-----------by changing the range of memory we access-----------------------\n");
+    */
     for(range = 1024;range <= NUMBER/8;range *= 2)
     {
         test_cache_capacity(array,range);
@@ -122,7 +127,7 @@ int main(int argc, char *argv[])
         for(i = 0; i < times_missPenalty; i++)
         {
             /*set the interval to 32 to prevent prefetch optimization based on locality*/
-            array_missPenalty[(i * 32) & (NUMBER-1)]++;
+            array_missPenalty[(i * 16) & (NUMBER-1)]++;
         }
         end = gettime();
         // printf("cost = %10llu us\n", end - begin);
