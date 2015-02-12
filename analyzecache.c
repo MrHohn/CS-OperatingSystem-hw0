@@ -112,6 +112,15 @@ int main(int argc, char *argv[])
         rate_cache_line[i] = (average_access_time[i+1] - average_access_time[i]) / average_access_time[i];
         printf("%f\n", rate_cache_line[i]);
     }
+    int cache_line_size = 0;
+    int index = 0;
+    for(i = 1; i < 128; i *=2){
+        if(abs(rate_cache_line[index+1]) < 0.2 && abs(rate_cache_line[index+2]) < 0.2 && rate_cache_line[index] > 0.3){
+            cache_line_size = i * 4;
+        }
+        index++;
+    }
+    printf("Cache Block/Line Size: %d B\n", cache_line_size);
 
 
 
@@ -127,8 +136,7 @@ int main(int argc, char *argv[])
         test_cache_capacity(array,range);
         /*the range would be timed 4*/
         /*it is the number of elements in an int array*/
-        printf("when range = %10d B,cost %14llu us\n",
-        range*4,end-begin);
+        // printf("when range = %10d B,cost %14llu us\n", range*4,end-begin);
                 
     }
 
