@@ -14,7 +14,7 @@ __u64 begin;
 
 __u64 gettime()
 {
-       struct timeval tv;
+        struct timeval tv;
         gettimeofday(&tv,NULL);
         return ((__u64)(tv.tv_sec))*MILLION+tv.tv_usec;
 }
@@ -153,7 +153,7 @@ int test_cache()
 
 int main(int argc, char *argv[])
 {
-    // test_cache();
+    test_cache();
 
     int *array1 = NULL;
     array1 = malloc(64*1024*1024*sizeof(int));
