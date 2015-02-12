@@ -88,11 +88,11 @@ int test_cache()
          return -1;
     }
     
-    // for(i = 0;i<NUMBER;i++)
-    // {
-    //  array[i] = i;
-    // }
-    // test_cache_linesize(array,NUMBER,1);
+    for(i = 0;i<NUMBER;i++)
+    {
+     array[i] = i;
+    }
+    test_cache_linesize(array,NUMBER,1);
    
    printf("---------test cache linesize-------------------------------------------\n");
    printf("---------by chagning the interval we access the array----------\n");   
@@ -246,31 +246,31 @@ int main(int argc, char *argv[])
     double penalty_L3 = diff * 1000 / access;
     printf("penalty of L3 cache = %10f ns\n", penalty_L3);
 
-    // int mod_for_init = cache_size_l3 / 4 - 1;
-    // for(i = 0; i < (mod_for_init + 1) / 16; i++)
-    // {
-    //     // array1[i]++;
-    //     array1[(i * 16) & (mod_for_init)]++;
-    // }
+    int mod_for_init = cache_size_l3 / 4 - 1;
+    for(i = 0; i < (mod_for_init + 1) / 16; i++)
+    {
+        // array1[i]++;
+        array1[(i * 16) & (mod_for_init)]++;
+    }
 
-    // __u64 times2 = 10000000;
+    __u64 times2 = 10000000;
     // int mod2 = cache_size_l2 * 2 / 4 -1;
-    // // int mod2 = cache_size_l3 - 1;
-    // loop = 1;
-    // begin = gettime();
-    // for(j = 0; j < loop; j++){
-    //     for(i = 0; i < times2; i++)
-    //     {
-    //         // array1[i]++;
-    //         array1[(i * 16) & (mod2)]++;
-    //     }
-    // }
-    // end = gettime();
-    // printf("cost = %10llu us\n", end - begin);
-    // diff = end - begin;
-    // access = times2 * loop;
-    // double penalty_L2 = diff * 1000 / access;
-    // printf("penalty of L2 cache = %10f ns\n", penalty_L2);
+    // int mod2 = cache_size_l3 - 1;
+    loop = 1;
+    begin = gettime();
+    for(j = 0; j < loop; j++){
+        for(i = 0; i < times2; i++)
+        {
+            // array1[i]++;
+            array1[(i * 16) & (mod_for_init)]++;
+        }
+    }
+    end = gettime();
+    printf("cost = %10llu us\n", end - begin);
+    diff = end - begin;
+    access = times2 * loop;
+    double penalty_L2 = diff * 1000 / access;
+    printf("penalty of L2 cache = %10f ns\n", penalty_L2);
 
 
     free(array1);
