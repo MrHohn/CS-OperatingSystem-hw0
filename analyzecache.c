@@ -21,10 +21,48 @@ __u64 gettime()
     return ((__u64)(tv.tv_sec))*MILLION+tv.tv_usec;
 }
 
-int test_cache_linesize(char array[],int len,int K)
+int get_cache_linesize(char array[])
 {
+    int i, K, i_test = 0;
+    double diff, access_time, access_cost[20];
+    // double average_access_cost[10];
+
+    cache_line_helper(array, NUMBER*4, 1);
+
+    for(K = 1;K < 8096;K *= 2) 
+    {
+        cache_line_helper(array, NUMBER*4, K);
+        diff = end - begin;
+        access_cost[i_test] = diff;
+        access_time = NUMBER / K;
+        // average_access_cost[i_test] = diff / access_time;
+        // printf("When K = %d, Average access time: %f us\n", K, average_access_cost[i_test]);
+        printf("when K = %8d,access %8d times,cost %8llu us\n", K,NUMBER/K,end - begin);     
+        i_test++;
+    }
+    
+    int cachelinesize = 0, index = 1;
+    double divide0, divide1, divide2;
+    for(i = 2; i < 1024; i *=2){
+        divide0 = access_cost[index] / access_cost[index-1];
+        divide1 = access_cost[index+2] / access_cost[index+1];
+        divide2 = access_cost[index+3] / access_cost[index+2];
+        // printf("%d %f %f %f\n", i, divide0, divide1, divide2);
+        if((divide1 < 0.7) && (divide2 < 0.65) && (divide0 > 0.85)){
+            cachelinesize = i;
+        }
+        index++;
+    }
+    // printf("Cache Block/Line Size: %d B\n", cachelinesize);
+
+    return cachelinesize;
+
+}
+
+int cache_line_helper(char array[], int len, int K)
+{    
     int i,j;
-    char a;
+    // char a;
     begin = gettime();
     for(i = 0;i < len; i += K)
     {
@@ -36,18 +74,21 @@ int test_cache_linesize(char array[],int len,int K)
 
 }
 
-
 int get_cache_size(int array[])
 {
     int ranges[14];
     double rates[14];
     int index_cache_size = 0;
     int range;
-    for(range = 1024;range <= NUMBER/8;range *= 2)
+    /*
+    -----------test the size of L2 cache------------------------------
+    -----------by changing the range of memory we access---------------
+    */
+    for(range = 1024; range <= NUMBER/8; range *= 2)
     {
         int pre_cost = end - begin; 
             
-        cache_size_helper(array,range);
+        cache_size_helper(array, range);
         end = gettime();
         
         int cost = end - begin;
@@ -77,7 +118,7 @@ int get_cache_size(int array[])
     return cachesize[1]/1024;
 }
 
-int cache_size_helper(int array[],int range)
+int cache_size_helper(int array[], int range)
 {
     int i;
     int lenmod = range -1;
@@ -98,100 +139,12 @@ int cache_size_helper(int array[],int range)
     return 0;
 }
 
-int test_cache_missPenalty(int array[], int size, int K){
-
-}
-
-
-int main(int argc, char *argv[])
-{
-    
-    int *array = NULL;
-    array = malloc(NUMBER*sizeof(int));
-    char *array_cache_line = NULL;
-    array_cache_line = malloc(NUMBER*4*sizeof(char));
-
+double get_cache_misspenalty(void)
+{ 
     int i, j;
-    int K;
-    int i_test = 0;
-    int range;
-    int size;
-    double diff_cache_line;
-    double access_cache_line;
-    double average_access_time[10];
-    double access_time[20];
-
-    if(array == NULL)
-    {
-        printf("malloc space for array failed \n");
-        return -1;
-    }
-
-    if(array_cache_line == NULL)
-    {
-        printf("malloc space for array failed \n");
-        return -1;   
-    }
-    test_cache_linesize(array_cache_line, NUMBER*4, 1);
-
-    for(K = 1;K < 8096;K *= 2) 
-    {
-        test_cache_linesize(array_cache_line, NUMBER*4, K);
-        diff_cache_line = end - begin;
-        access_time[i_test] = diff_cache_line;
-        access_cache_line = NUMBER / K;
-        // average_access_time[i_test] = diff_cache_line / access_cache_line;
-        // printf("When K = %d, Average access time: %f us\n", K, average_access_time[i_test]);
-        printf("when K = %8d,access %8d times,cost %8llu us\n", K,NUMBER/K,end - begin);     
-        i_test++;
-    }
-    
-    int cache_line_size = 0;
-    int index = 1;
-    double divide0;
-    double divide1;
-    double divide2;
-    for(i = 2; i < 1024; i *=2){
-        divide0 = access_time[index] / access_time[index-1];
-        divide1 = access_time[index+2] / access_time[index+1];
-        divide2 = access_time[index+3] / access_time[index+2];
-        printf("%d %f %f %f\n", i, divide0, divide1, divide2);
-        if((divide1 < 0.7) && (divide2 < 0.65) && (divide0 > 0.85)){
-            cache_line_size = i;
-        }
-        index++;
-    }
-    printf("Cache Block/Line Size: %d B\n", cache_line_size);
-
-
-
-    free(array_cache_line);
-    
-    /*
-    printf("-----------test the size of L2 cache-----------------------\n");
-    printf("-----------by changing the range of memory we access-----------------------\n");
-    */
-    int cachesize;
-    bool done = false;
-    
-    while (!done)
-    {
-        cachesize = get_cache_size(array);
-        if (cachesize >= 128 && cachesize <= 1024)
-        {
-            // If the result is not resonable, execute the test again.
-            done = true;
-        }
-    }
-
-    printf("Cache Size: %d KB\n", cachesize);
- 
-    free(array);
-        
-    /*--------Last part is the code for testing miss penalty---------*/
     /*set times of access to a number smaller than arraysize/interval */
     /*to prevent out of range*/
-   __u64 times_missPenalty = 3000000;
+    __u64 times_missPenalty = 3000000;
     __u64 loop = 10;
     double penalty[loop];
     /*test the miss penalty for 'loop' times*/
@@ -206,7 +159,7 @@ int main(int argc, char *argv[])
         for(i = 0; i < times_missPenalty; i++)
         {
             /*set the interval to 32 to prevent prefetch optimization based on locality*/
-            array_missPenalty[(i * 16) & (NUMBER-1)]++;
+            array_missPenalty[(i * 32) & (NUMBER-1)]++;
         }
         end = gettime();
         // printf("cost = %10llu us\n", end - begin);
@@ -221,7 +174,67 @@ int main(int argc, char *argv[])
         penalty[0] += penalty[i];    
     }
     penalty[0] /= loop;
-    printf("Cache Miss Penalty: %f us\n", penalty[0]);
+
+    return penalty[0];
+}
+
+int main(int argc, char *argv[])
+{
+    /*--------below is the code for testing cache line size---------*/
+
+    int i, j, K;
+    char *array_cacheline = NULL;
+    array_cacheline = malloc(NUMBER*4*sizeof(char));
+    
+    if(array_cacheline == NULL)
+    {
+        printf("malloc space for array failed \n");
+        return -1;   
+    }
+
+    int cachelinesize, timecacheline;
+
+    for(timecacheline = 0; timecacheline < 10; timecacheline++)
+    {
+        cachelinesize = get_cache_linesize(array_cacheline);
+        if(cachelinesize != 0)break;
+    }
+
+    printf("Cache Block/Line Size: %d B\n", cachelinesize);
+
+    free(array_cacheline);
+    
+
+    /*--------the code for testing L2 cache size---------*/
+
+    int cachesize = 0;
+    bool done = false;
+    int *array_cachesize = NULL;
+    array_cachesize = malloc(NUMBER*sizeof(int));
+    
+    if(array_cachesize == NULL)
+    {
+        printf("malloc space for array failed \n");
+        return -1;
+    }
+
+    for(timecacheline = 0; timecacheline < 3; timecacheline++)
+    {
+         cachesize = get_cache_size(array_cachesize);
+        // If the result is not resonable, execute the test again.
+        if (cachesize >= 128 && cachesize <= 1024)break;
+        cachesize = 0;
+    }
+
+    printf("Cache Size: %d KB\n", cachesize);
+ 
+    free(array_cachesize);
+        
+    /*--------Last part is the code for testing miss penalty---------*/
+    
+    double penalty = get_cache_misspenalty();
+    
+    printf("Cache Miss Penalty: %f us\n", penalty);
 
     return 0;
 }
