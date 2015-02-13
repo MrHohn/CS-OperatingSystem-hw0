@@ -26,49 +26,15 @@ int test_cache_linesize(char array[],int len,int K)
     int i,j;
     char a;
     begin = gettime();
-        for(i = 0;i < len; i += K)
-        {
-            // array[i]++;
-            array[i] = 's';
-            // a = array[i];
-            // a = array[i];
-            // int b = a + a;
-        }
+    for(i = 0;i < len; i += K)
+    {
+        array[i] = 's';
+    }
     end = gettime();
 
     return 0;
 
 }
-
-/*
-int test_cache_linesize(int array[],int len,int K)
-{
-    int i,j;
-    int a;
-    begin = gettime();
-    // for(j = 0; j < 16; j += 1){
-        for(i = 0;i < len; i += K)
-        {
-            // array[i]++;
-            array[i]*=3;
-            // a = array[i];
-            // int b = a + a;
-        }
-    // }
-    // int mod = len / 4 - 1;
-    // for(i = 0; i < 32*1024*1024; i++){
-    //     array[(i*K) & (mod)]++;        
-    // }
-    end = gettime();
-    // double diff = end - begin;
-    // double access = len / K;
-    // double average_access_time = diff / access;
-    // printf("When K = %d, Average access time: %f us\n", K, average_access_time);
-
-    return 0;
-
-}
-*/
 
 
 int get_cache_size(int array[])
@@ -87,7 +53,7 @@ int get_cache_size(int array[])
         int cost = end - begin;
         double change_rate= (double) abs(cost - pre_cost) / pre_cost; 
 
-        //printf("when range = %10d B, cost %10d us, increase rate: %f\n", range*4, cost, change_rate);
+        printf("when range = %10d B, cost %10d us, increase rate: %f\n", range*4, cost, change_rate);
 
         ranges[index_cache_size] = range*4;
         rates[index_cache_size] = change_rate; 
@@ -132,7 +98,6 @@ int cache_size_helper(int array[],int range)
     return 0;
 }
 
-
 int test_cache_missPenalty(int array[], int size, int K){
 
 }
@@ -175,71 +140,33 @@ int main(int argc, char *argv[])
         diff_cache_line = end - begin;
         access_time[i_test] = diff_cache_line;
         access_cache_line = NUMBER / K;
-        average_access_time[i_test] = diff_cache_line / access_cache_line;
-        printf("When K = %d, Average access time: %f us\n", K, average_access_time[i_test]);
+        // average_access_time[i_test] = diff_cache_line / access_cache_line;
+        // printf("When K = %d, Average access time: %f us\n", K, average_access_time[i_test]);
         printf("when K = %8d,access %8d times,cost %8llu us\n", K,NUMBER/K,end - begin);     
         i_test++;
     }
-    double rate_cache_line[13];
-    for(i = 0; i < 13; i++){
-        rate_cache_line[i] = (average_access_time[i+1] - average_access_time[i]) / average_access_time[i];
-        printf("%f\n", rate_cache_line[i]);
-    }
-
-    free(array_cache_line);
     
-    // test_cache_linesize(array,NUMBER,1);
-    /*
-    printf("---------test cache linesize-------------------------------------------\n");
-    printf("---------by chagning the interval we access the array----------\n");   
-    */
-
-
-/*
-    for(K = 1;K < 1024;K *= 2) 
-    {
-        test_cache_linesize(array,NUMBER,K);
-        diff_cache_line = end - begin;
-        access_time[i_test] = diff_cache_line;
-        access_cache_line = NUMBER / K;
-        average_access_time[i_test] = diff_cache_line / access_cache_line;
-        printf("When K = %d, Average access time: %f us\n", K, average_access_time[i_test]);
-        printf("when K = %8d,access %8d times,cost %8llu us\n", K,NUMBER/K,end - begin);     
-        i_test++;
-    } 
-
-    double rate_cache_line[9];
-    for(i = 0; i < 9; i++){
-        rate_cache_line[i] = (average_access_time[i+1] - average_access_time[i]) / average_access_time[i];
-        printf("%f\n", rate_cache_line[i]);
-    }
     int cache_line_size = 0;
     int index = 1;
-    int max = 0;
     double divide0;
     double divide1;
     double divide2;
-    for(i = 2; i < 256; i *=2){
-        // if((fabs(rate_cache_line[index+1]) < 0.3) && (fabs(rate_cache_line[index+2]) < 0.3) && (rate_cache_line[index] > 0.3)){
-        //     cache_line_size = i * 4;
-        // }
-        // printf("abs %f\n", fabs(rate_cache_line[index]));
-        // if(fabs(rate_cache_line[index]) > fabs(rate_cache_line[max])){
-        //     max = index;
-        //     cache_line_size = i * 4 * 2;
-        // }
-        divide0 = access_time[index] / access_time[index - 1];
-        divide1 = access_time[index+1] / access_time[index];
-        divide2 = access_time[index+2] / access_time[index+1];
-        printf("%f %f\n", divide1, divide2);
-        if(divide1 > 0.35 && divide1 < 0.65 && divide2 > 0.35 && divide2 < 0.65 && (divide0 > 0.65 || divide0 < 0.35)){
-            cache_line_size = i * 4 / 2;
+    for(i = 2; i < 1024; i *=2){
+        divide0 = access_time[index] / access_time[index-1];
+        divide1 = access_time[index+2] / access_time[index+1];
+        divide2 = access_time[index+3] / access_time[index+2];
+        printf("%d %f %f %f\n", i, divide0, divide1, divide2);
+        if((divide1 < 0.7) && (divide2 < 0.65) && (divide0 > 0.85)){
+            cache_line_size = i;
         }
         index++;
     }
     printf("Cache Block/Line Size: %d B\n", cache_line_size);
-*/
 
+
+
+    free(array_cache_line);
+    
     /*
     printf("-----------test the size of L2 cache-----------------------\n");
     printf("-----------by changing the range of memory we access-----------------------\n");
@@ -257,7 +184,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    printf("Cache Size: %d KB", cachesize);
+    printf("Cache Size: %d KB\n", cachesize);
  
     free(array);
         
