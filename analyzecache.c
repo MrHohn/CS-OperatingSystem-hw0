@@ -20,6 +20,26 @@ __u64 gettime()
     return ((__u64)(tv.tv_sec))*MILLION+tv.tv_usec;
 }
 
+int test_cache_linesize(char array[],int len,int K)
+{
+    int i,j;
+    char a;
+    begin = gettime();
+        for(i = 0;i < len; i += K)
+        {
+            // array[i]++;
+            array[i] = 's';
+            // a = array[i];
+            // a = array[i];
+            // int b = a + a;
+        }
+    end = gettime();
+
+    return 0;
+
+}
+
+/*
 int test_cache_linesize(int array[],int len,int K)
 {
     int i,j;
@@ -47,6 +67,7 @@ int test_cache_linesize(int array[],int len,int K)
     return 0;
 
 }
+*/
 
 int test_cache_capacity(int array[],int range)
 {
@@ -80,6 +101,8 @@ int main(int argc, char *argv[])
     
     int *array = NULL;
     array = malloc(NUMBER*sizeof(int));
+    char *array_cache_line = NULL;
+    array_cache_line = malloc(NUMBER*4*sizeof(char));
 
     int i, j;
     int K;
@@ -89,19 +112,48 @@ int main(int argc, char *argv[])
     double diff_cache_line;
     double access_cache_line;
     double average_access_time[10];
-    double access_time[10];
+    double access_time[20];
 
     if(array == NULL)
     {
         printf("malloc space for array failed \n");
         return -1;
     }
+
+    if(array_cache_line == NULL)
+    {
+        printf("malloc space for array failed \n");
+        return -1;   
+    }
+    test_cache_linesize(array_cache_line, NUMBER*4, 1);
+
+    for(K = 1;K < 8096;K *= 2) 
+    {
+        test_cache_linesize(array_cache_line, NUMBER*4, K);
+        diff_cache_line = end - begin;
+        access_time[i_test] = diff_cache_line;
+        access_cache_line = NUMBER / K;
+        average_access_time[i_test] = diff_cache_line / access_cache_line;
+        printf("When K = %d, Average access time: %f us\n", K, average_access_time[i_test]);
+        printf("when K = %8d,access %8d times,cost %8llu us\n", K,NUMBER/K,end - begin);     
+        i_test++;
+    }
+    double rate_cache_line[13];
+    for(i = 0; i < 13; i++){
+        rate_cache_line[i] = (average_access_time[i+1] - average_access_time[i]) / average_access_time[i];
+        printf("%f\n", rate_cache_line[i]);
+    }
+
+    free(array_cache_line);
     
-    test_cache_linesize(array,NUMBER,1);
+    // test_cache_linesize(array,NUMBER,1);
     /*
     printf("---------test cache linesize-------------------------------------------\n");
     printf("---------by chagning the interval we access the array----------\n");   
     */
+
+
+/*
     for(K = 1;K < 1024;K *= 2) 
     {
         test_cache_linesize(array,NUMBER,K);
@@ -144,7 +196,7 @@ int main(int argc, char *argv[])
         index++;
     }
     printf("Cache Block/Line Size: %d B\n", cache_line_size);
-
+*/
 
 
 
