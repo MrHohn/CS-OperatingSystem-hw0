@@ -2,6 +2,7 @@
 #include <stdlib.h> 
 #include <linux/types.h>
 #include <string.h>
+#include <stdbool.h>
 #include "analyzecache.h"
 
 #define SIZE_1KB (1024)
@@ -69,11 +70,52 @@ int test_cache_linesize(int array[],int len,int K)
 }
 */
 
-int test_cache_capacity(int array[],int range)
+
+int get_cache_size(int array[])
+{
+    int ranges[14];
+    double rates[14];
+    int index_cache_size = 0;
+    int range;
+    for(range = 1024;range <= NUMBER/8;range *= 2)
+    {
+        int pre_cost = end - begin; 
+            
+        cache_size_helper(array,range);
+        end = gettime();
+        
+        int cost = end - begin;
+        double change_rate= (double) abs(cost - pre_cost) / pre_cost; 
+
+        //printf("when range = %10d B, cost %10d us, increase rate: %f\n", range*4, cost, change_rate);
+
+        ranges[index_cache_size] = range*4;
+        rates[index_cache_size] = change_rate; 
+        index_cache_size++; 
+    }
+    
+    int cachesize[3]; // Track the sizes for L1, L2, L3 cache
+    int level = 0;
+
+    int i;
+    for(i = 1; i < 14; i++) 
+    {
+        if (rates[i + 1] >= 1.5*rates[i] && rates[i + 1] >= 1.5*rates[i + 2])
+        {
+            // If the change rate of cost is apparantly larger than its neighbor's, 
+            // then there must be a capacity miss, so we fetch the result
+            cachesize[level++] = ranges[i];
+        }
+    }    
+
+    return cachesize[1]/1024;
+}
+
+int cache_size_helper(int array[],int range)
 {
     int i;
     int lenmod = range -1;
-    int times = 64*SIZE_1MB;
+    int times = 64*SIZE_1MB*8;
     /*the flag is indicating the range size*/
     int flag = range / 16 -1;
     /*loop the array one time first in order to put the data into cache*/
@@ -198,64 +240,25 @@ int main(int argc, char *argv[])
     printf("Cache Block/Line Size: %d B\n", cache_line_size);
 */
 
-
-
-
-
-
     /*
     printf("-----------test the size of L2 cache-----------------------\n");
     printf("-----------by changing the range of memory we access-----------------------\n");
     */
-    int ranges[14];
-    double rates[14];
-    int index_cache_size = 0;
-    for(range = 1024;range <= NUMBER/8;range *= 2)
-    {
-            int pre_cost = end - begin; 
-            
-        // begin =gettime();
-        test_cache_capacity(array,range);
-        end = gettime();
-           
-            int cost = end - begin;
-            double change_rate= (double) abs(cost - pre_cost) / pre_cost; 
+    int cachesize;
+    bool done = false;
     
-        printf("when range = %10d B, cost %10d us, increase rate: %f\n", range*4, cost, change_rate);
-
-        ranges[index_cache_size] = range*4;
-            rates[index_cache_size] = change_rate; 
-            index_cache_size++; 
-
-        //printf("when range = %10d B,cost %14llu us\n", range*4, end-begin);
-
-        // if(range == 2*SIZE_1MB/sizeof(int))
-        // {
-        //      begin =gettime();
-        //      test_cache_capacity(array,3*SIZE_1MB/sizeof(int));
-        //      end = gettime();
-        //      printf("when range = %10d,cost %14llu us\n",
-        //               3*SIZE_1MB,end-begin);
-        // }
-
-    }
-    
-    int cachesize[3];
-    int level = 0;
-    for(j = 1; j < 14; j++) 
+    while (!done)
     {
-    if (rates[j + 1] >= 1.5*rates[j] && rates[j + 1] >= 1.5*rates[j + 2])
-    {
-            cachesize[level++] = ranges[j];
+        cachesize = get_cache_size(array);
+        if (cachesize >= 128 && cachesize <= 1024)
+        {
+            // If the result is not resonable, execute the test again.
+            done = true;
         }
-    }    
-    
-    for(level = 0; level < 3; level++)
-    { 
-        printf("L%d Cache Size: %d KB\n", level + 1, cachesize[level] / 1024);
     }
 
-
+    printf("Cache Size: %d KB", cachesize);
+ 
     free(array);
         
     /*--------Last part is the code for testing miss penalty---------*/
