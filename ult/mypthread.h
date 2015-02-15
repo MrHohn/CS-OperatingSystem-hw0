@@ -2,38 +2,20 @@
 #define H_MYPTHREAD
 
 #include <bits/pthreadtypes.h>
-#include <bits/wordsize.h>
 #include <sys/ucontext.h>
 
-// ucontext_t coroutine_main;
 // Types
 typedef struct {
 	// Define any fields you might need inside here.
-	// static ucontext_t ctx;
 	ucontext_t ctx;
-	char st[8192];
+	char st[8192]; //define the stack space for each thread
 } mypthread_t;
 
 // typedef unsigned long int mypthread_t;
 
 typedef struct {
 	// Define any fields you might need inside here.
-	int __detachstate;
-	int __schedpolicy;
-	// struct sched_param __schedparam;
-	int __inheritsched;
-	int __scope;
-	size_t __guardsize;
-	int __stackaddr_set;
-	void * __stackaddr;
-	size_t __stacksize;
 } mypthread_attr_t;
-
-// typedef union {
-// 	// Define any fields you might need inside here.
-// 	char __size[__SIZEOF_PTHREAD_ATTR_T];
-// 	long int __align;
-// } mypthread_attr_t;
 
 
 // Functions

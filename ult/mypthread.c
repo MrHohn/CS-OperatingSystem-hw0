@@ -8,7 +8,7 @@ ucontext_t coroutine_main;
 
 //Nodes in Doubly linked lists.
 struct Node  {
-	int id;
+	int id; //id for each thread
 	ucontext_t context;
 	struct Node* next;
 	struct Node* prev;
